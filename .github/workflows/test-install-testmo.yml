@@ -1,0 +1,15 @@
+name: temp test for install-testmo
+on:
+    push
+jobs:
+    TEST:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./actions/install-testmo
+            - shell: bash
+              run: |
+                echo "Hello, world!"
+                echo "Node.js version: $(node --version)"
+                echo "npm version: $(npm --version)"
+                echo "testmo-cli version: $(testmo --version)"
