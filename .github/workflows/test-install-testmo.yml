@@ -6,7 +6,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - uses: ./actions/install-testmo
+            - uses: neuralmagic/nm-actions/actions/install-testmo@add-install-testmo-action
+              name: "Install Testmo custom action"
             - shell: bash
               run: |
                 echo "Hello, world!"
