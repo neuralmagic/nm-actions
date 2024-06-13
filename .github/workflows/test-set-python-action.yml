@@ -1,0 +1,21 @@
+on:
+  push
+
+jobs:
+  TEST-SET-PYTHON:
+    runs-on: ubuntu-latest
+    steps:
+      - id: set-python
+        uses: neuralmagic/nm-actions/actions/set-python@add-set-python-action
+        with:
+          python: 3.10.12
+          venv: sample
+      - shell: bash
+        run: |
+          echo "sample next step"
+          echo "set-python version output: ${{ steps.set-python.outputs.version }}"
+          echo "set-python venv_path output: ${{ steps.set-python.outputs.venv_path }}"
+          echo "activating using `venv_path`..."
+          source "${{ steps.set-python.outputs.venv_path }}/bin/activate"
+          echo "python binary: $(python -c 'import sys; print(sys.executable)')"
+          echo "pip version info: $(pip -V)"
