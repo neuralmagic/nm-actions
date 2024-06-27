@@ -1,10 +1,10 @@
 # install-automation-components
 
-This action will install various basic tools/components used during automation such as `curl`, `git`, and `wget`.
+This action will install various basic tools/components used during automation, since we are using very thin images when testing. Installs include: `git`, `curl`, `gh` cli, etc.
 
 ## Requirements
 
-This action is currently designed to be used in a Debian-based environment — specifically, one using `apt` as the package manager.
+This action is currently designed to be used in a Debian-based environment — specifically, one using `apt` or `apt-get` as the package manager.
 
 ## Usage
 
