@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 # Script to create a TestMo "resources" file containing a specified
 # set of fields.  The fields are passed in as JSON with the key being the name
