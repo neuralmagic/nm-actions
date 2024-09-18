@@ -48,7 +48,7 @@ runs:
           ## not checking testmo_url and token as this should be
           ## called between "create" and "complete"
           if [[ -f "${{ inputs.resources_file }}" ]]; then
-            thread_resources=${inputs.resources_file})
+            thread_resources=${{ inputs.resources_file }}
           else
             echo '{}' > thread_resources.json
             thread_resources=thread_resources.json
