@@ -11,7 +11,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: add actions path to PATH
+      shell: bash
+      run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+
     - run: |
         echo "composing TESTMO resources file ${{ inputs.resources_file }} ..."
-        compose_testmo_resources_file.py --resources_json ${{ inputs.resources_json }} --destination ${{ inputs.resources_file }}
+        compose_testmo_resources_file.py \
+          --resources_json ${{ inputs.resources_json }} \
+          --destination ${{ inputs.resources_file }}
       shell: bash
