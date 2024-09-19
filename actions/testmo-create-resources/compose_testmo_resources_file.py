@@ -42,7 +42,7 @@ if __name__ == "__main__":
             "type": "string",
             "value": fields[field]
         }
-        testmo_command = "npx testmo automation:resources:add_field" + \
+        testmo_command = "npx testmo automation:resources:add_field " + \
                          " ".join([f"--{k} {v}"
                                    for k, v in testmo_args.items()])
 
