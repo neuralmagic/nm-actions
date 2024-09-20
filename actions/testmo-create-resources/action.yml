@@ -16,7 +16,7 @@ runs:
       run: echo "${{ github.action_path }}" >> $GITHUB_PATH
 
     - run: |
-        debug_rsc_result=$(npx testmo automation:resources:add_field \
+        debug_rsc_result=$(npx testmo automation:resources:add-field \
           --name "junk_field_name" \
           --type "string" \
           --value "foobar" \
