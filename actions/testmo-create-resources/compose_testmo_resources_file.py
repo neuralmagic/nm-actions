@@ -28,8 +28,8 @@ if __name__ == "__main__":
         "-d",
         "--destination",
         help="filepath relative to REPO root to generate the file,"
-             " default '.buildkite/test-pipeline.yaml'.",
-        default='.buildkite/test-pipeline.yaml',
+             " default 'testmo_resources.json'.",
+        default='testmo_resources.json',
         type=str)
 
     args = args_parser.parse_args()
