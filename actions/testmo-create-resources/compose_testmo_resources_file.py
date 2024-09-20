@@ -52,5 +52,6 @@ if __name__ == "__main__":
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=True,
-            cwd=pathlib.Path.cwd()
+            cwd=pathlib.Path.cwd(),
+            shell=True
         )
