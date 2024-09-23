@@ -37,7 +37,7 @@ runs:
           REPORT=0
         else
           RESULTS=$(find ${{ inputs.results }} -type f -name "*.xml")
-          echo "found results at: ${RESULTS}" >> "$GITHUB_OUTPUT"
+          echo "found results at: ${RESULTS}"
         fi
         if [[ -z "${RESULTS}" ]]; then
           REPORT=0
