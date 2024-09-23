@@ -16,12 +16,6 @@ runs:
       run: echo "${{ github.action_path }}" >> $GITHUB_PATH
 
     - run: |
-        debug_rsc_result=$(npx testmo automation:resources:add-field \
-          --name "junk_field_name" \
-          --type "string" \
-          --value "foobar" \
-          --resources "junk_resources.json")
-        echo "junk=${debug_rsc_result}" >> "${GITHUB_OUTPUT}"
         echo "composing TESTMO resources file ${{ inputs.resources_file }} ..."
         compose_testmo_resources_file.py \
           --resources_json '${{ inputs.resources_json }}' \
