@@ -10,8 +10,6 @@
 
 import argparse
 import json
-import pathlib
-import shlex
 import subprocess
 
 if __name__ == "__main__":
@@ -31,7 +29,6 @@ if __name__ == "__main__":
         help="absolute path for where to generate the file,",
         type=str)
 
-    print(f"cwd: {pathlib.Path.cwd()}")  # noqa: T201
     args = args_parser.parse_args()
     fields = json.loads(args.resources_json)
 
@@ -44,15 +41,6 @@ if __name__ == "__main__":
         ]
         testmo_command = ["npx", "testmo", "automation:resources:add-field"]
         full_command = testmo_command + testmo_args
-        print(f"running command: {shlex.join(full_command)}")  # noqa: T201
 
         # run the command and raise any exceptions
-        subprocess.run(  # noqa: S602
-            full_command,
-            check=True,
-            cwd=pathlib.Path.cwd(),
-            shell=True
-        )
-
-    print(f"destination: {args.destination}")  # noqa: T201
-    print(f"exists: {pathlib.Path(args.destination).exists()}")  # noqa: T201
+        subprocess.run(full_command, check=True)

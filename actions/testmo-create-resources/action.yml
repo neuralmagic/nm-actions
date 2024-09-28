@@ -1,17 +1,14 @@
 ---
 name: create testmo resources
-description: create a TestMo resource .json file
+description: create a Testmo resource .json file
 
 inputs:
-  testmo_token:
-    description: testmo token
-    required: true
   resources_file:
     description: file name where the resources will be stored
     required: true
   resources_json:
     description: stringified JSON associative array of resource fields to add.  Each field's
-      key is the name of the field, and it's value is the value of the field.
+      key is the name of the field, and its value is the value of the field.
     default: ''
     required: false
 
@@ -22,17 +19,17 @@ runs:
       shell: bash
       run: echo "${{ github.action_path }}" >> $GITHUB_PATH
 
-    - name: compose TESTMO resources file
+    - name: compose Testmo resources file
       run: |
-        echo "composing TESTMO resources file ${{ inputs.resources_file }} ..."
-        echo "shell CWD: $(pwd)"
-        ls -A
+        echo "composing Testmo resources file '$RESOURCES_FILE'"
+
         compose_testmo_resources_file.py \
-          --resources_json '${{ inputs.resources_json }}' \
-          --destination "${{ inputs.resources_file }}"
-        ls -A
-        echo "resource file ${{ inputs.resources_json }} contents:"
-        cat "${{ inputs.resources_file }}"
-      env:
-        TESTMO_TOKEN: ${{ inputs.testmo_token }}
+          --resources_json "$RESOURCES_JSON" \
+          --destination "$RESOURCES_FILE"
+
+        echo "resources file contents:"
+        cat "$RESOURCES_FILE"
       shell: bash
+      env:
+        RESOURCES_FILE: ${{ inputs.resources_file }}
+        RESOURCES_JSON: ${{ inputs.resources_json }}
