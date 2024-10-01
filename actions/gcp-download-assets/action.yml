@@ -14,11 +14,6 @@ inputs:
     required: false
     default: '.'
 
-outputs:
-  asset:
-    description: REPO relative path to downloaded "whl"
-    value: ${{ steps.download.outputs.asset }}
-
 runs:
   using: composite
   steps:
