@@ -1,0 +1,79 @@
+---
+name: submit reportportal execution results
+description: submit JUnitXML formatted test execution results to ReportPortal
+
+inputs:
+  reportportal_url:
+    description: reportportal URL
+    required: true
+  reportportal_token:
+    description: reportportal token
+    required: true
+  source:
+    description: source for reportportal, e.g. 'build-test'
+    required: true
+  project_id:
+    description: reportportal project id
+    required: true
+  run_name:
+    description: run name
+    required: false
+  launch_id:
+    description: ID of the launch to append results to
+    required: true
+  results:
+    description: directory of JUnit '*.xml' formatted result files
+    required: true
+
+outputs:
+  id:
+    description: test results execution id
+    value: ${{ steps.reportportal_submit_results_xml.outputs.id }}
+
+runs:
+  using: composite
+  steps:
+    - name: upload results
+      id: reportportal_submit_results_xml
+      run: |
+        echo "submitting test run to ReportPortal..."
+        ## CHECK reportportal_url and token
+        if [[ -z "${REPORTPORTAL_URL}" ]]; then
+          echo "The REPORTPORTAL_URL secret is not defined for this repository"
+          exit 1
+        fi
+
+        if [[ -z "${REPORTPORTAL_TOKEN}" ]]; then
+          echo "The REPORTPORTAL_TOKEN secret is not defined for this repository"
+          exit 1
+        fi
+
+        # verify results folder exists
+        if [[ ! -d "$RESULTS_FOLDER" ]]; then
+          echo "Results folder '$RESULTS_FOLDER' does not exist in working directory:"
+          ls -A
+          echo "::warning title=$GITHUB_JOB - MISSING RESULTS FOLDER::Results folder does not exist in working directory"
+          exit 1
+        fi
+
+        # verify results folder contains XML result files
+        readarray -d '' RESULTS < <(find "$RESULTS_FOLDER" -type f -name "*.xml" -print0)
+        if [[ ${#RESULTS[@]} == 0 ]]; then
+          echo "Results folder '$RESULTS_FOLDER' does not contain any XML result files:"
+          ls -A "$RESULTS_FOLDER"
+          echo "::warning title=$GITHUB_JOB - MISSING RESULT FILES::Results folder did not contain any XML result files"
+          exit 1
+        fi
+
+        ## TODO: what does the request look like?  does it need to loop through the files list?
+        # submit results
+        SUCCESS=0
+
+        -- step-status.sh "$STEP_STATUS" || SUCCESS=$?
+        echo "status=$SUCCESS" >> "$GITHUB_OUTPUT"
+        exit "$SUCCESS"
+      env:
+        REPORTPORTAL_URL: ${{ inputs.reportportal_url }}
+        REPORTPORTAL_TOKEN: ${{ inputs.reportportal_token }}
+        PROJECT_ID: ${{ inputs.project_id }}
+      shell: bash
