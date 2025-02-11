@@ -9,9 +9,6 @@ inputs:
   reportportal_token:
     description: reportportal token
     required: true
-  source:
-    description: source for reportportal, e.g. 'build-test'
-    required: true
   project_id:
     description: reportportal project id
     required: true
