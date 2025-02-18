@@ -3,6 +3,12 @@ name: create reportportal launch
 description: create neuralmagic reportportal launch and return its ID
 
 inputs:
+  cred_username:
+    description: credential username for accessing droute
+    required: true
+  cred_password:
+    description: credential password for accessing droute
+    required: true
   run_name:
     description: run name
     required: false
@@ -50,6 +56,6 @@ runs:
 
         echo "launch_id=${LAUNCH_ID}" >> "${GITHUB_OUTPUT}"
       env:
-        DROUTE_USERNAME: ${{ secrets.droute_username }}
-        DROUTE_PASSWORD: ${{ secrets.droute_password }}
+        DROUTE_USERNAME: ${{ inputs.cred_username }}
+        DROUTE_PASSWORD: ${{ inputs.cred_password }}
       shell: bash
