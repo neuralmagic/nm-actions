@@ -1,6 +1,7 @@
 ---
 name: submit reportportal execution results
 description: submit JUnitXML formatted test execution results to ReportPortal
+
 # assumes DROUTE_USERNAME, DROUTE_PASSWORD are available SECRETS
 # and DROUTE_URL is defined in nm-set-env/action.yml
 
