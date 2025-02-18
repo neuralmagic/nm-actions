@@ -6,6 +6,12 @@ description: submit JUnitXML formatted test execution results to ReportPortal
 # and DROUTE_URL is defined in nm-set-env/action.yml
 
 inputs:
+  cred_username:
+    description: credential username for accessing droute
+    required: true
+  cred_password:
+    description: credential password for accessing droute
+    required: true
   launch_id:
     description: ID of the launch to append results to
     required: true
@@ -76,7 +82,6 @@ runs:
         echo "status=$SUCCESS" >> "$GITHUB_OUTPUT"
         exit "$SUCCESS"
       env:
-        # TODO: add droute credentials to SECRETS
-        DROUTE_USERNAME: ${{ secrets.droute_username }}
-        DROUTE_PASSWORD: ${{ secrets.droute_password }}
+        DROUTE_USERNAME: ${{ inputs.cred_username }}
+        DROUTE_PASSWORD: ${{ inputs.cred_password }}
       shell: bash
