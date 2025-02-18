@@ -1,20 +1,10 @@
 ---
 name: submit reportportal execution results
 description: submit JUnitXML formatted test execution results to ReportPortal
+# assumes DROUTE_USERNAME, DROUTE_PASSWORD are available SECRETS
+# and DROUTE_URL is defined in nm-set-env/action.yml
 
 inputs:
-  reportportal_url:
-    description: reportportal URL
-    required: true
-  reportportal_token:
-    description: reportportal token
-    required: true
-  project_id:
-    description: reportportal project id
-    required: true
-  run_name:
-    description: run name
-    required: false
   launch_id:
     description: ID of the launch to append results to
     required: true
@@ -30,47 +20,62 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: install droute CLI tool
+      uses: neuralmagic/nm-actions/actions/install-droute@testmo-to-reportportal
+
     - name: upload results
       id: reportportal_submit_results_xml
       run: |
         echo "submitting test run to ReportPortal..."
-        ## CHECK reportportal_url and token
-        if [[ -z "${REPORTPORTAL_URL}" ]]; then
-          echo "The REPORTPORTAL_URL secret is not defined for this repository"
+        ## CHECK droute credentials
+        if [[ -z "${DROUTE_USERNAME}" ]]; then
+          echo "The DROUTE_USERNAME is not defined for this repository"
           exit 1
         fi
 
-        if [[ -z "${REPORTPORTAL_TOKEN}" ]]; then
-          echo "The REPORTPORTAL_TOKEN secret is not defined for this repository"
+        if [[ -z "${DROUTE_PASSWORD}" ]]; then
+          echo "The DROUTE_PASSWORD secret is not defined for this repository"
           exit 1
         fi
 
         # verify results folder exists
-        if [[ ! -d "$RESULTS_FOLDER" ]]; then
-          echo "Results folder '$RESULTS_FOLDER' does not exist in working directory:"
+        if [[ ! -d "$NMRE_JUNIT_BASE" ]]; then
+          echo "Results folder '$NMRE_JUNIT_BASE' does not exist in working directory:"
           ls -A
           echo "::warning title=$GITHUB_JOB - MISSING RESULTS FOLDER::Results folder does not exist in working directory"
           exit 1
         fi
 
         # verify results folder contains XML result files
-        readarray -d '' RESULTS < <(find "$RESULTS_FOLDER" -type f -name "*.xml" -print0)
+        readarray -d '' RESULTS < <(find "$NMRE_JUNIT_BASE" -type f -name "*.xml" -print0)
         if [[ ${#RESULTS[@]} == 0 ]]; then
-          echo "Results folder '$RESULTS_FOLDER' does not contain any XML result files:"
-          ls -A "$RESULTS_FOLDER"
+          echo "Results folder '$NMRE_JUNIT_BASE' does not contain any XML result files:"
+          ls -A "$NMRE_JUNIT_BASE"
           echo "::warning title=$GITHUB_JOB - MISSING RESULT FILES::Results folder did not contain any XML result files"
           exit 1
         fi
 
-        ## TODO: what does the request look like?  does it need to loop through the files list?
-        # submit results
+        # merge results
+        pip install junitparser
+        mkdir -p combined_results
+        junitparser merge --glob paths ${{ inputs.results }}/*.xml combined_results/all_test_results.xml
+
+        # TODO: it may be necessary to gzip the resulting xml file to get through droute
+
+        # compose our metadata file
+        # TODO: what is content of the metadata file?
+        # TODO: have to pass in metadata content so we can have different info for llm-compressor and vllm
+
         SUCCESS=0
+        # TODO: Is the following the correct request to datarouter?
+        droute send --metadata datarouter.json --results combined_results/all_test_results.xml --username ${DROUTE_USERNAME} --password ${DROUTE_PASSWORD} --url ${DROUTE_URL} --verbose
+        # TODO: capture output and verify success
 
         -- step-status.sh "$STEP_STATUS" || SUCCESS=$?
         echo "status=$SUCCESS" >> "$GITHUB_OUTPUT"
         exit "$SUCCESS"
       env:
-        REPORTPORTAL_URL: ${{ inputs.reportportal_url }}
-        REPORTPORTAL_TOKEN: ${{ inputs.reportportal_token }}
-        PROJECT_ID: ${{ inputs.project_id }}
+        # TODO: add droute credentials to SECRETS
+        DROUTE_USERNAME: ${{ secrets.droute_username }}
+        DROUTE_PASSWORD: ${{ secrets.droute_password }}
       shell: bash
