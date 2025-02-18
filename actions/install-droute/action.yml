@@ -1,0 +1,17 @@
+---
+name: Install droute CLI tool
+description: Install droute if necessary
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |-
+        if ! /usr/local/bin/droute version &> /dev/null; then
+          wget https://repository-basic.engineering.redhat.com/nexus/repository/dno-raw/droute-client/1.2.2/droute-linux-amd64 
+          mv droute-linux-amd64 /usr/local/bin/droute \
+          chmod +x /usr/local/bin/droute
+          echo "install-droute - installed droute $(droute version)"
+        else
+          echo "install-droute - testmo-cli $(droute version) already installed"
+        fi

@@ -3,18 +3,6 @@ name: create reportportal launch
 description: create neuralmagic reportportal launch and return its ID
 
 inputs:
-  reportportal_url:
-    description: reportportal URL
-    required: true
-  reportportal_token:
-    description: reportportal token
-    required: true
-  source:
-    description: source for reportportal, e.g. 'build-test'
-    required: true
-  project_id:
-    description: reportportal project id
-    required: true
   run_name:
     description: run name
     required: false
@@ -27,17 +15,20 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: install droute CLI tool
+      uses: neuralmagic/nm-actions/actions/install-droute@testmo-to-reportportal
+
     - name: create launch
       id: reportportal_create_launch_id
       run: |
         echo "creating reportportal launch ..."
         ## CHECK reportportal_url and token
-        if [[ -z "${REPORTPORTAL_URL}" ]]; then
-          echo "The REPORTPORTAL_URL secret is not defined for this repository"
+        if [[ -z "${DROUTE_USERNAME}" ]]; then
+          echo "The DROUTE_USERNAME is not defined for this repository"
           exit 1
         fi
-        if [[ -z "${REPORTPORTAL_TOKEN}" ]]; then
-          echo "The REPORTPORTAL_TOKEN secret is not defined for this repository"
+        if [[ -z "${DROUTE_PASSWORD}" ]]; then
+          echo "The DROUTE_PASSWORD secret is not defined for this repository"
           exit 1
         fi
         ## construct name
@@ -51,27 +42,14 @@ runs:
         starttime=$(date -Iseconds)
 
         ## construct launch request
-        LAUNCH_ID = $(curl -L -X POST "${REPORTPORTAL_URL}/api/v1/plugin/${PROJECT_ID}/junit/import" \
-        -H "Content-Type: multipart/form-data" \
-        -H "Authorization: Bearer ${REPORTPORTAL_TOKEN}" \
-        -F 'file=@"file_path.zip";type=application/x-zip-compressed' \
-        -F 'launchImportRq="{
-          \"attributes\": [
-            {
-              \"key\": \"skippedIsNotIssue\",
-              \"system\": true,
-              \"value\": \"true\"
-            }
-          ],
-          \"description\": \"vllm tests\",
-          \"mode\": \"DEFAULT\",
-          \"name\": \"${REPORTPORTAL_RUN_NAME}\",
-          \"startTime\": \"${starttime}\"
-        }";type=application/json' | jq -r .id)
+        # TODO: what is the content of datarouter.json
+        # TODO: Is the following the correct request to datarouter?
+        droute send --metadata datarouter.json --username ${DROUTE_USERNAME} --password ${DROUTE_PASSWORD} --url ${DROUTE_URL} --verbose
+        # TODO: capture output and verify success
+        # TODO: collect the launch id from the response
 
         echo "launch_id=${LAUNCH_ID}" >> "${GITHUB_OUTPUT}"
       env:
-        REPORTPORTAL_URL: ${{ inputs.reportportal_url }}
-        REPORTPORTAL_TOKEN: ${{ inputs.reportportal_token }}
-        PROJECT_ID: ${{ inputs.project_id }}
+        DROUTE_USERNAME: ${{ secrets.droute_username }}
+        DROUTE_PASSWORD: ${{ secrets.droute_password }}
       shell: bash
