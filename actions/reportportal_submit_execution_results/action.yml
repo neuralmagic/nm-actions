@@ -12,7 +12,7 @@ inputs:
   cred_password:
     description: credential password for accessing droute
     required: true
-  droute_url: 
+  droute_url:
     description: URL to access data router hub
     required: true
   launch_id:
