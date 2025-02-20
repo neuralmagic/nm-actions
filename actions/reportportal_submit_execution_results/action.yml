@@ -12,6 +12,9 @@ inputs:
   cred_password:
     description: credential password for accessing droute
     required: true
+  droute_url: 
+    description: URL to access data router hub
+    required: true
   launch_id:
     description: ID of the launch to append results to
     required: true
@@ -85,4 +88,5 @@ runs:
       env:
         DROUTE_USERNAME: ${{ inputs.cred_username }}
         DROUTE_PASSWORD: ${{ inputs.cred_password }}
+        DROUTE_URL: ${{ inputs.droute_url }}
       shell: bash
