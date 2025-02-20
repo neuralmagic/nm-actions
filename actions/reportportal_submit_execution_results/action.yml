@@ -46,18 +46,18 @@ runs:
         fi
 
         # verify results folder exists
-        if [[ ! -d "$NMRE_JUNIT_BASE" ]]; then
-          echo "Results folder '$NMRE_JUNIT_BASE' does not exist in working directory:"
+        if [[ ! -d "${NMRE_JUNIT_BASE}" ]]; then
+          echo "Results folder '${NMRE_JUNIT_BASE}' does not exist in working directory:"
           ls -A
           echo "::warning title=$GITHUB_JOB - MISSING RESULTS FOLDER::Results folder does not exist in working directory"
           exit 1
         fi
 
         # verify results folder contains XML result files
-        readarray -d '' RESULTS < <(find "$NMRE_JUNIT_BASE" -type f -name "*.xml" -print0)
+        readarray -d '' RESULTS < <(find "${NMRE_JUNIT_BASE}" -type f -name "*.xml" -print0)
         if [[ ${#RESULTS[@]} == 0 ]]; then
-          echo "Results folder '$NMRE_JUNIT_BASE' does not contain any XML result files:"
-          ls -A "$NMRE_JUNIT_BASE"
+          echo "Results folder '${NMRE_JUNIT_BASE}' does not contain any XML result files:"
+          ls -A "${NMRE_JUNIT_BASE}"
           echo "::warning title=$GITHUB_JOB - MISSING RESULT FILES::Results folder did not contain any XML result files"
           exit 1
         fi
@@ -66,6 +66,7 @@ runs:
         pip install junitparser
         mkdir -p combined_results
         junitparser merge --glob paths ${{ inputs.results }}/*.xml combined_results/all_test_results.xml
+        # TODO: is this recursive?  does it need to be?
 
         # TODO: it may be necessary to gzip the resulting xml file to get through droute
 
