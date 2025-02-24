@@ -15,17 +15,20 @@ inputs:
   droute_url:
     description: URL to access data router hub
     required: true
-  launch_id:
-    description: ID of the launch to append results to
+  run_name:
+    description: Name to assign to the generated launch
+    required: false
+  run_url:
+    description: URL to GitHub run that generated results
     required: true
   results:
     description: directory of JUnit '*.xml' formatted result files
     required: true
 
 outputs:
-  id:
-    description: test results execution id
-    value: ${{ steps.reportportal_submit_results_xml.outputs.id }}
+  launch_url:
+    description: ReportPortal URL to launch for test results
+    value: ${{ steps.reportportal_submit_results_xml.outputs.launch_url }}
 
 runs:
   using: composite
@@ -33,7 +36,7 @@ runs:
     - name: install droute CLI tool
       uses: neuralmagic/nm-actions/actions/install-droute@testmo-to-reportportal
 
-    - name: upload results
+    - name: upload results to reportportal
       id: reportportal_submit_results_xml
       run: |
         echo "submitting test run to ReportPortal..."
@@ -48,6 +51,15 @@ runs:
           exit 1
         fi
 
+        ## construct name
+        REPORTPORTAL_RUN_NAME="${{ inputs.run_name }}"
+        if [[ -z "${{ inputs.run_name }}" ]]; then
+            BRANCH_NAME=${GITHUB_REF_NAME}
+            TMP=${ACTOR}-${BRANCH_NAME}
+            REPORTPORTAL_RUN_NAME=$(echo ${TMP} | awk '{print tolower($0)}')
+        fi
+        echo "test run name: ${REPORTPORTAL_RUN_NAME}"
+
         # verify results folder exists
         if [[ ! -d "${NMRE_JUNIT_BASE}" ]]; then
           echo "Results folder '${NMRE_JUNIT_BASE}' does not exist in working directory:"
@@ -55,6 +67,9 @@ runs:
           echo "::warning title=$GITHUB_JOB - MISSING RESULTS FOLDER::Results folder does not exist in working directory"
           exit 1
         fi
+
+        # pull result files from gcp bucket and extract to a collection of individual xml files
+        # TODO
 
         # verify results folder contains XML result files
         readarray -d '' RESULTS < <(find "${NMRE_JUNIT_BASE}" -type f -name "*.xml" -print0)
@@ -72,7 +87,6 @@ runs:
         # TODO: is this recursive?  does it need to be?
 
         # TODO: it may be necessary to gzip the resulting xml file to get through droute
-
         # compose our metadata file
         # TODO: what is content of the metadata file?
         # TODO: have to pass in metadata content so we can have different info for llm-compressor and vllm
@@ -81,6 +95,7 @@ runs:
         # TODO: Is the following the correct request to datarouter?
         droute send --metadata datarouter.json --results combined_results/all_test_results.xml --username ${DROUTE_USERNAME} --password ${DROUTE_PASSWORD} --url ${DROUTE_URL} --verbose
         # TODO: capture output and verify success
+        echo "launch_url=${LAUNCH_URL}" >> "$GITHUB_OUTPUT"
 
         -- step-status.sh "$STEP_STATUS" || SUCCESS=$?
         echo "status=$SUCCESS" >> "$GITHUB_OUTPUT"
