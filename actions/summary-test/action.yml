@@ -9,9 +9,6 @@ inputs:
   gitref:
     description: git commit hash or branch name
     required: true
-  testmo_run_url:
-    description: testmo URL for this particular run
-    required: true
   python:
     description: python version info
     required: true
@@ -50,5 +47,4 @@ runs:
             echo "| extra: | ${{ inputs.extra }} |" >> $GITHUB_STEP_SUMMARY
         fi
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "#### TestMo URL: ${{ inputs.testmo_run_url }}" >> $GITHUB_STEP_SUMMARY
       shell: bash
