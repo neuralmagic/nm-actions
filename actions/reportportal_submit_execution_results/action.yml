@@ -64,7 +64,7 @@ runs:
         echo "test run name: $REPORTPORTAL_RUN_NAME"
 
         # pull JUnitXML result files from gcp bucket
-        gcloud storage cp --recursive "${{ secrets.GCP_BUILD_ASSETS }}/${{ inputs.run_id }}/test-results" .
+        gcloud storage cp "${{ secrets.GCP_BUILD_ASSETS }}/${{ inputs.run_id }}/test-results" .
 
         # verify results folder contains XML result files
         readarray -d '' RESULTS < <(find "test-results" -type f -name "*.xml" -print0)
@@ -74,12 +74,6 @@ runs:
           echo "::warning title=$GITHUB_JOB - MISSING RESULT FILES::Results folder did not contain any XML result files"
           exit 1
         fi
-
-        # merge results
-        # TODO: remove this comment after confirming droute handles multiple file input
-        # pip install junitparser
-        # mkdir -p combined_results
-        # junitparser merge --glob paths test-results/*.xml combined_results/all_test_results.xml
 
         # compose our metadata file
         jq -n '{
@@ -113,7 +107,7 @@ runs:
         # capture output and verify success
         SUCCESS=0
         LAUNCH_URL = $(droute send --metadata datarouter.json \
-                                   --results test-results/*.xml \
+                                   --results 'test-results/*.xml' \
                                    --username "$DROUTE_USERNAME" \
                                    --password "$DROUTE_PASSWORD" \
                                    --url "$DROUTE_URL" \
