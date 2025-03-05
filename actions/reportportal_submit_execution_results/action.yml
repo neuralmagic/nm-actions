@@ -81,7 +81,7 @@ runs:
             "reportportal": {
               "disabled": false,
               "config": {
-                "hostname": "reportportal-vllm-inference.apps.dno.ocp-hub.prod.psi.redhat.com",
+                "hostname": "$REPORTPORTAL_HOST",
                 "project": "${{ inputs.project }}"
               },
               "processing": {
@@ -122,4 +122,5 @@ runs:
         DROUTE_USERNAME: ${{ inputs.cred_username }}
         DROUTE_PASSWORD: ${{ inputs.cred_password }}
         DROUTE_URL: ${{ inputs.droute_url }}
+        REPORTPORTAL_HOST: ${{ secrets.REPORTPORTAL_HOST }}
       shell: bash
