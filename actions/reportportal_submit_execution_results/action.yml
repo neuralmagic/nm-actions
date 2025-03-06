@@ -15,6 +15,9 @@ inputs:
   droute_url:
     description: URL to access data router hub
     required: true
+  reportportal_host:
+    description: hostname for the ReportPortal instance 
+    required: true
   run_name:
     description: Name to assign to the generated launch
     required: false
@@ -24,8 +27,8 @@ inputs:
   project:
     description: reportPortal project; vllm, llm-compressor, compressed-tensors
     required: true
-  version:
-    description: version of the product under test
+  launch_metadata_key_values:
+    description: single quoted list of double quoted pairs of strings making key/value pairs.  E.g. '"product_version" "v0.7.2" "product" "vllm"'
     required: true
 
 outputs:
@@ -76,33 +79,20 @@ runs:
         fi
 
         # compose our metadata file
-        jq -n '{
-          "targets": {
-            "reportportal": {
-              "disabled": false,
-              "config": {
-                "hostname": "$REPORTPORTAL_HOST",
-                "project": "${{ inputs.project }}"
-              },
-              "processing": {
-                "apply_tfa": true,
-                "merge_launches": true,
-                "simple_xml": false,
-                "auto_dashboard": false,
-                "launch_with_class_name": true,
-                "property_filter": [".*"],
-                "debug": true,
-                "launch": {
-                  "name": "${{ inputs.run_name }}",
-                  "description": "GitHub run url: ${{ inputs.run_url}}",
-                  "attributes": [
-                    {"key": "Product Version", "value": "${{ inputs.version }}"},
-                  ]
-                }
-              }
-            }
-          }
-        }' > datarouter.json
+        # add the reportportal host, project, launch name, and launch description to the datarouter json
+        jq --raw-output \
+           -f droute_config_filters.jq \
+           --arg host ${{ inputs.reportportal_host }} \
+           --arg proj ${{ inputs.project }} \
+           --arg launch_name ${{ inputs.run_name }} \
+           --arg launch_desc "GitHub run url: ${{ inputs.run_url}}" \
+           droute_send_template.json >  datarouter.json
+        # add the requested launch metadata to the launch "attributes"
+        echo ${{ inputs.launch_metadata_key_values }} | jq -n --raw-output '[{"key":inputs, "value":input}]' > metadata.json
+        jq --raw-output \
+           --slurpfile metadata metadata.json \
+           '.targets.reportportal.processing.launch.attributes = $metadata[0]' \
+           datarouter.json > tmp.json && mv tmp.json datarouter.json
 
         # capture output and verify success
         SUCCESS=0
@@ -122,5 +112,5 @@ runs:
         DROUTE_USERNAME: ${{ inputs.cred_username }}
         DROUTE_PASSWORD: ${{ inputs.cred_password }}
         DROUTE_URL: ${{ inputs.droute_url }}
-        REPORTPORTAL_HOST: ${{ secrets.REPORTPORTAL_HOST }}
+        REPORTPORTAL_HOST: ${{ inputs.reportportal_host }}
       shell: bash
