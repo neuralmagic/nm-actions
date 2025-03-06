@@ -2,34 +2,30 @@
 name: submit reportportal execution results
 description: submit JUnitXML formatted test execution results to ReportPortal
 
-# assumes DROUTE_USERNAME, DROUTE_PASSWORD are available SECRETS
-# and DROUTE_URL is defined in nm-set-env/action.yml
-
 inputs:
-  cred_username:
-    description: credential username for accessing droute
+  droute_username:
+    description: username for accessing droute
     required: true
-  cred_password:
-    description: credential password for accessing droute
+  droute_password:
+    description: password for accessing droute
     required: true
   droute_url:
-    description: URL to access data router hub
+    description: droute url
     required: true
-  reportportal_host:
-    description: hostname for the ReportPortal instance
-    required: true
-  run_name:
-    description: Name to assign to the generated launch
-    required: false
-  run_url:
-    description: URL to GitHub run that generated results
-    required: true
-  project:
-    description: reportPortal project; vllm, llm-compressor, compressed-tensors
-    required: true
-  launch_metadata_key_values:
-    description: single quoted list of double quoted pairs of strings making key/value pairs.  E.g.
-      '"product_version" "v0.7.2" "product" "vllm"'
+  metadata_filepath:
+    description: |
+      path to the metadata json file; it contains following info:
+      {
+         "hostname": <reportportal_host>,
+         "project": <project>,
+         "name": <run_name>,
+         "description": <GHA run url>
+         "attributes": {
+              "wheel": <wheel name>,
+              "wf_category": <workflow category>,
+              ...
+         }
+      }
     required: true
 
 outputs:
@@ -58,42 +54,30 @@ runs:
           exit 1
         fi
 
-        ## construct name
-        REPORTPORTAL_RUN_NAME="${{ inputs.run_name }}"
-        if [[ -z "${{ inputs.run_name }}" ]]; then
-            BRANCH_NAME="$GITHUB_REF_NAME"
-            TMP="$ACTOR-$BRANCH_NAME"
-            REPORTPORTAL_RUN_NAME=$(echo $TMP | awk '{print tolower($0)}')
-        fi
-        echo "test run name: $REPORTPORTAL_RUN_NAME"
-
-        # pull JUnitXML result files from gcp bucket
-        gcloud storage cp "${{ secrets.GCP_BUILD_ASSETS }}/${{ inputs.run_id }}/test-results" .
-
-        # verify results folder contains XML result files
-        readarray -d '' RESULTS < <(find "test-results" -type f -name "*.xml" -print0)
-        if [[ ${#RESULTS[@]} == 0 ]]; then
-          echo "Results folder 'test-results' does not contain any XML result files:"
-          ls -A "test-results"
-          echo "::warning title=$GITHUB_JOB - MISSING RESULT FILES::Results folder did not contain any XML result files"
+        if [[ ! -f ${{ inputs.metadata_filepath }} ]]; then
+          echo "Cannot find metadata info file: ${{ inputs.metadata_filepath }}"
           exit 1
         fi
 
-        # compose our metadata file
-        # add the reportportal host, project, launch name, and launch description to the datarouter json
+        # pull JUnitXML result files from gcp bucket
+        gcloud storage cp "${{ secrets.GCP_BUILD_ASSETS }}/${{ inputs.run_id }}/test-results" test-results
+
+        # verify results folder contains XML result files
+        readarray -d '' RESULTS < <(find "test-results" -type f -name "*.xml" -print0)
+        if [[ $(ls test-results/*.xml | wc -l) -eq 0 ]]; then
+          echo "No xml files found under test-results/"
+          exit 1
+        fi
+
+        # generate report metadata file
         jq --raw-output \
-           -f droute_config_filters.jq \
-           --arg host ${{ inputs.reportportal_host }} \
-           --arg proj ${{ inputs.project }} \
-           --arg launch_name ${{ inputs.run_name }} \
-           --arg launch_desc "GitHub run url: ${{ inputs.run_url}}" \
-           droute_send_template.json >  datarouter.json
-        # add the requested launch metadata to the launch "attributes"
-        echo ${{ inputs.launch_metadata_key_values }} | jq -n --raw-output '[{"key":inputs, "value":input}]' > metadata.json
-        jq --raw-output \
-           --slurpfile metadata metadata.json \
-           '.targets.reportportal.processing.launch.attributes = $metadata[0]' \
-           datarouter.json > tmp.json && mv tmp.json datarouter.json
+           --slurpfile metadata ${{ inputs.metadata_filepath }} \
+           '.targets.reportportal.config.hostname = $metadata[0].hostname |
+            .targets.reportportal.config.project = $metadata[0].project |
+            .targets.reportportal.processing.launch.name = $metadata[0].name |
+            .targets.reportportal.processing.launch.description = $metadata[0].description |
+            .targets.reportportal.processing.launch.attributes = $metadata[0].attributes' \
+           droute_send_template.json > datarouter.json
 
         # capture output and verify success
         SUCCESS=0
@@ -110,8 +94,7 @@ runs:
         echo "status=$SUCCESS" >> "$GITHUB_OUTPUT"
         exit "$SUCCESS"
       env:
-        DROUTE_USERNAME: ${{ inputs.cred_username }}
-        DROUTE_PASSWORD: ${{ inputs.cred_password }}
+        DROUTE_USERNAME: ${{ inputs.droute_username }}
+        DROUTE_PASSWORD: ${{ inputs.droute_password }}
         DROUTE_URL: ${{ inputs.droute_url }}
-        REPORTPORTAL_HOST: ${{ inputs.reportportal_host }}
       shell: bash
