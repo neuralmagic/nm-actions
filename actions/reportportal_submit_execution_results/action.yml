@@ -16,7 +16,7 @@ inputs:
     description: URL to access data router hub
     required: true
   reportportal_host:
-    description: hostname for the ReportPortal instance 
+    description: hostname for the ReportPortal instance
     required: true
   run_name:
     description: Name to assign to the generated launch
@@ -28,7 +28,8 @@ inputs:
     description: reportPortal project; vllm, llm-compressor, compressed-tensors
     required: true
   launch_metadata_key_values:
-    description: single quoted list of double quoted pairs of strings making key/value pairs.  E.g. '"product_version" "v0.7.2" "product" "vllm"'
+    description: single quoted list of double quoted pairs of strings making key/value pairs.  E.g.
+      '"product_version" "v0.7.2" "product" "vllm"'
     required: true
 
 outputs:
