@@ -36,8 +36,8 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: install droute CLI tool
-      uses: neuralmagic/nm-actions/actions/install-droute@testmo-to-reportportal
+    #- name: install droute CLI tool
+    #  uses: neuralmagic/nm-actions/actions/install-droute@testmo-to-reportportal
 
     - name: upload results to reportportal
       id: reportportal_submit_results_xml
@@ -76,6 +76,8 @@ runs:
             .targets.reportportal.processing.launch.description = $metadata[0].description |
             .targets.reportportal.processing.launch.attributes = $metadata[0].attributes' \
            droute_send_template.json > datarouter.json
+
+        cat datarouter.json
 
         # capture output and verify success
         SUCCESS=0
