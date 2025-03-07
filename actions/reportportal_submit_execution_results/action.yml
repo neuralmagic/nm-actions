@@ -69,7 +69,7 @@ runs:
         ls $TEST_RESULTS
 
         # generate report metadata file
-        TEMPLATE=`find ~/work/ -type f -name 'droute_send_template.json'`
+        TEMPLATE=`find ~ -type f -name 'droute_send_template.json'`
         echo "Generating datarouter.json based on template $TEMPLATE"
         jq --raw-output \
            --slurpfile metadata ${{ inputs.metadata_filepath }} \
