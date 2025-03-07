@@ -59,13 +59,11 @@ runs:
           exit 1
         fi
 
-        # pull JUnitXML result files from gcp bucket
-        gcloud storage cp "${{ secrets.GCP_BUILD_ASSETS }}/${{ inputs.run_id }}/test-results" test-results
-
+        # assuming gcp assets already downloaded
         # verify results folder contains XML result files
-        readarray -d '' RESULTS < <(find "test-results" -type f -name "*.xml" -print0)
-        if [[ $(ls test-results/*.xml | wc -l) -eq 0 ]]; then
-          echo "No xml files found under test-results/"
+        TEST_RESULTS=`find . -type d -name test-results`
+        if [ ! -d $TEST_RESULTS ] || [ $(ls $TEST_RESULTS/*.xml | wc -l) -eq 0 ]; then
+          echo "Test result folder doesn't exist or no xml files found under $TEST_RESULTS"
           exit 1
         fi
 
