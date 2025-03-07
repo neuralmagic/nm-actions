@@ -9,7 +9,7 @@ runs:
     - shell: bash
       run: |-
         sudo apt update -y
-        sudo apt install -y curl git-all wget jq yq
+        sudo apt install -y curl git-all wget jq
         #if ! droute version &> /dev/null; then
         #  wget https://repository-basic.engineering.redhat.com/nexus/repository/dno-raw/droute-client/1.2.2/droute-linux-amd64
         #  mv droute-linux-amd64 /usr/local/bin/droute \
@@ -18,3 +18,6 @@ runs:
         #else
         #  echo "install-droute - testmo-cli $(droute version) already installed"
         #fi
+
+    - name: 'Setup yq'
+      uses: dcarbone/install-yq-action@v1
