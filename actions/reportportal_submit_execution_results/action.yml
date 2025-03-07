@@ -66,8 +66,10 @@ runs:
           echo "Test result folder doesn't exist or no xml files found under $TEST_RESULTS"
           exit 1
         fi
+        echo "Found results folder: $TEST_RESULTS"
 
         # generate report metadata file
+        TEMPLATE=`find . -type f -name 'droute_send_template.json'`
         jq --raw-output \
            --slurpfile metadata ${{ inputs.metadata_filepath }} \
            '.targets.reportportal.config.hostname = $metadata[0].hostname |
@@ -75,14 +77,14 @@ runs:
             .targets.reportportal.processing.launch.name = $metadata[0].name |
             .targets.reportportal.processing.launch.description = $metadata[0].description |
             .targets.reportportal.processing.launch.attributes = $metadata[0].attributes' \
-           droute_send_template.json > datarouter.json
+           $TEMPLATE > datarouter.json
 
         cat datarouter.json
 
         # capture output and verify success
         SUCCESS=0
         LAUNCH_URL = $(droute send --metadata datarouter.json \
-                                   --results 'test-results/*.xml' \
+                                   --results "$TEST_RESULTS/*.xml" \
                                    --username "$DROUTE_USERNAME" \
                                    --password "$DROUTE_PASSWORD" \
                                    --url "$DROUTE_URL" \
