@@ -69,11 +69,7 @@ runs:
         ls $TEST_RESULTS
 
         # generate report metadata file
-        echo "current directory:"
-        pwd
-        echo "ls /home/runner/_work/compressed-tensors/compressed-tensors/"
-        ls /home/runner/_work/compressed-tensors/compressed-tensors/
-        TEMPLATE=`find . -type f -name 'droute_send_template.json'`
+        TEMPLATE=`find /home/runner/work/_actions/ -type f -name 'droute_send_template.json'`
         echo "Generating datarouter.json based on template $TEMPLATE"
         jq --raw-output \
            --slurpfile metadata ${{ inputs.metadata_filepath }} \
