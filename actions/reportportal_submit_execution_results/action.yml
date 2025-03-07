@@ -36,8 +36,8 @@ outputs:
 runs:
   using: composite
   steps:
-    #- name: install droute CLI tool
-    #  uses: neuralmagic/nm-actions/actions/install-droute@testmo-to-reportportal
+    - name: install droute CLI tool
+      uses: neuralmagic/nm-actions/actions/install-report-tools@testmo-to-reportportal
 
     - name: upload results to reportportal
       id: reportportal_submit_results_xml
@@ -69,6 +69,10 @@ runs:
         ls $TEST_RESULTS
 
         # generate report metadata file
+        echo "current directory:"
+        pwd
+        echo "ls /home/runner/_work/compressed-tensors/compressed-tensors/"
+        ls /home/runner/_work/compressed-tensors/compressed-tensors/
         TEMPLATE=`find . -type f -name 'droute_send_template.json'`
         echo "Generating datarouter.json based on template $TEMPLATE"
         jq --raw-output \
