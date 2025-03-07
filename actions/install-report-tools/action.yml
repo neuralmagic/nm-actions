@@ -5,15 +5,16 @@ description: Install droute and utilities needed for reporting
 runs:
   using: composite
   steps:
+
     - shell: bash
       run: |-
         sudo apt update -y
         sudo apt install -y curl git-all wget jq yq
-        if ! /usr/local/bin/droute version &> /dev/null; then
-          wget https://repository-basic.engineering.redhat.com/nexus/repository/dno-raw/droute-client/1.2.2/droute-linux-amd64 
-          mv droute-linux-amd64 /usr/local/bin/droute \
-          chmod +x /usr/local/bin/droute
-          echo "install-droute - installed droute $(droute version)"
-        else
-          echo "install-droute - testmo-cli $(droute version) already installed"
-        fi
+        #if ! droute version &> /dev/null; then
+        #  wget https://repository-basic.engineering.redhat.com/nexus/repository/dno-raw/droute-client/1.2.2/droute-linux-amd64
+        #  mv droute-linux-amd64 /usr/local/bin/droute \
+        #  chmod +x /usr/local/bin/droute
+        #  echo "install-droute - installed droute $(droute version)"
+        #else
+        #  echo "install-droute - testmo-cli $(droute version) already installed"
+        #fi
