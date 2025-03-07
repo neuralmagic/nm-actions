@@ -42,7 +42,6 @@ runs:
     - name: upload results to reportportal
       id: reportportal_submit_results_xml
       run: |
-        echo "submitting test run to ReportPortal..."
         ## CHECK droute credentials
         if [[ -z "$DROUTE_USERNAME" ]]; then
           echo "The DROUTE_USERNAME is not defined for this repository"
@@ -66,10 +65,12 @@ runs:
           echo "Test result folder doesn't exist or no xml files found under $TEST_RESULTS"
           exit 1
         fi
-        echo "Found results folder: $TEST_RESULTS"
+        echo "found results folder: $TEST_RESULTS"
+        ls $TEST_RESULTS
 
         # generate report metadata file
         TEMPLATE=`find . -type f -name 'droute_send_template.json'`
+        echo "Generating datarouter.json based on template $TEMPLATE"
         jq --raw-output \
            --slurpfile metadata ${{ inputs.metadata_filepath }} \
            '.targets.reportportal.config.hostname = $metadata[0].hostname |
@@ -78,10 +79,10 @@ runs:
             .targets.reportportal.processing.launch.description = $metadata[0].description |
             .targets.reportportal.processing.launch.attributes = $metadata[0].attributes' \
            $TEMPLATE > datarouter.json
-
         cat datarouter.json
 
         # capture output and verify success
+        echo "Submitting test run to ReportPortal..."
         SUCCESS=0
         LAUNCH_URL = $(droute send --metadata datarouter.json \
                                    --results "$TEST_RESULTS/*.xml" \

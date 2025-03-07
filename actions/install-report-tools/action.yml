@@ -1,12 +1,14 @@
 ---
-name: Install droute CLI tool
-description: Install droute if necessary
+name: Install report tools
+description: Install droute and utilities needed for reporting
 
 runs:
   using: composite
   steps:
     - shell: bash
       run: |-
+        sudo apt update -y
+        sudo apt install -y curl git-all wget jq yq
         if ! /usr/local/bin/droute version &> /dev/null; then
           wget https://repository-basic.engineering.redhat.com/nexus/repository/dno-raw/droute-client/1.2.2/droute-linux-amd64 
           mv droute-linux-amd64 /usr/local/bin/droute \
