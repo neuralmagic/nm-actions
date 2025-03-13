@@ -36,8 +36,9 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: install droute CLI tool
-      uses: neuralmagic/nm-actions/actions/install-report-tools@testmo-to-reportportal
+
+    - name: 'Setup yq'
+      uses: dcarbone/install-yq-action@v1
 
     - name: upload results to reportportal
       id: reportportal_submit_results_xml
