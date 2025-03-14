@@ -37,7 +37,7 @@ runs:
   using: composite
   steps:
 
-    - name: 'Setup yq'
+    - name: Setup yq
       uses: dcarbone/install-yq-action@v1
 
     - name: upload results to reportportal
@@ -85,16 +85,15 @@ runs:
         # capture output and verify success
         echo "Submitting test run to ReportPortal..."
         SUCCESS=0
-        LAUNCH_URL = $(droute send --metadata datarouter.json \
-                                   --results "$TEST_RESULTS/*.xml" \
-                                   --username "$DROUTE_USERNAME" \
-                                   --password "$DROUTE_PASSWORD" \
-                                   --url "$DROUTE_URL" \
-                                   --verbose \
-                                   --wait | yq -r '.targets[] | select(.name == "reportportal") | .events[] | select(.component == "reportportal-connector") | .message' | jq -r '.[0]."launch_url"')
-        echo "launch_url=$LAUNCH_URL" >> "$GITHUB_OUTPUT"
+        LAUNCH_URL=$(droute send --metadata datarouter.json \
+                                 --results "$TEST_RESULTS/*.xml" \
+                                 --username "$DROUTE_USERNAME" \
+                                 --password "$DROUTE_PASSWORD" \
+                                 --url "$DROUTE_URL" \
+                                 --verbose \
+                                 --wait | yq -r '.targets[] | select(.name == "reportportal") | .events[] | select(.component == "reportportal-connector") | .message' | jq -r '.[0]."launch_url"')  || SUCCESS="$?"
 
-        -- step-status.sh "$STEP_STATUS" || SUCCESS="$?"
+        echo "launch_url=$LAUNCH_URL" >> "$GITHUB_OUTPUT"
         echo "status=$SUCCESS" >> "$GITHUB_OUTPUT"
         exit "$SUCCESS"
       env:
