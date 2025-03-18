@@ -4,11 +4,9 @@ inputs:
   include-patterns:
     description: 'Comma-separated list of include patterns.'
     required: true
-    default: '.*'
   exclude-patterns:
     description: 'Comma-separated list of exclude patterns.'
-    required: true
-    default: ''
+    required: false
 
 outputs:
   all_changed_files:
