@@ -1,0 +1,27 @@
+---
+description: 'Matches changed files based on include and exclude patterns.'
+inputs:
+  include-patterns:
+    description: 'Comma-separated list of include patterns.'
+    required: true
+    default: '.*'
+  exclude-patterns:
+    description: 'Comma-separated list of exclude patterns.'
+    required: true
+    default: ''
+
+outputs:
+  status:
+    description: return status from change
+    value: ${{ steps.changed.output.all_changed_files }}
+
+runs:
+  using: composite
+  steps:
+    - id: changed
+      run: |
+        ${{ github.action_path }}/check_changed_files.sh
+      shell: bash
+      env:
+        INCLUDE_PATTERN: ${{inputs.include-patterns}}
+        EXCLUDE_PATTERN: ${{inputs.exclude-patterns}}
