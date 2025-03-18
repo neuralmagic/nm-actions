@@ -11,7 +11,7 @@ inputs:
     default: ''
 
 outputs:
-  status:
+  all_changed_files:
     description: return status from change
     value: ${{ steps.changed.output.all_changed_files }}
 
