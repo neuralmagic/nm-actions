@@ -1,11 +1,12 @@
 ---
-description: 'Matches changed files based on include and exclude patterns.'
+description: Matches changed files based on include and exclude patterns.
+
 inputs:
   include-patterns:
-    description: 'Comma-separated list of include patterns.'
+    description: New line separated list of include patterns.
     required: true
   exclude-patterns:
-    description: 'Comma-separated list of exclude patterns.'
+    description: New line separated list of exclude patterns.
     required: false
 
 outputs:
