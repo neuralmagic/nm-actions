@@ -13,8 +13,13 @@ else
 fi
 CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${previous_sha}..HEAD )
 
+if [[ -z ${INCLUDE_PATTERN} && -z ${EXCLUDE_PATTERN} ]]; then
+  echo "${CHANGED_FILES}"
+  exit 0
+fi
+
 IFS=',' read -r -a INCLUDE_PATTERNS <<< "${INCLUDE_PATTERN}"
-IFS=',' read -r -a EXCLUDE_PATTERNS <<< "${EXCLUDE_PATTERNS}"
+IFS=',' read -r -a EXCLUDE_PATTERNS <<< "${EXCLUDE_PATTERN}"
 MATCHED_FILES=""
 while IFS= read -r file; do
   # Check if the file matches any include pattern
