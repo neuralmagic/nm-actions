@@ -37,5 +37,4 @@ while IFS= read -r file; do
     fi
   done
 done <<< "$CHANGED_FILES"
-echo "all_changed_files=$MATCHED_FILES" >> "${GITHUB_ENV}"
-echo "all_changed_files=$MATCHED_FILES" >> "${GITHUB_OUTPUT}"
+echo "all_changed_files=$MATCHED_FILES" >> $GITHUB_OUTPUT
