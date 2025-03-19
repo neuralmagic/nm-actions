@@ -13,11 +13,6 @@ else
 fi
 CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${previous_sha}..HEAD )
 
-if [ -z "${EXCLUDE_PATTERN}" ]; then
-  echo "${CHANGED_FILES}"
-  exit 0
-fi
-
 IFS=$'\n' read -r -a INCLUDE_PATTERNS <<< "${INCLUDE_PATTERN}"
 IFS=$'\n' read -r -a EXCLUDE_PATTERNS <<< "${EXCLUDE_PATTERN}"
 MATCHED_FILES=""
