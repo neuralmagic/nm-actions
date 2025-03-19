@@ -17,3 +17,11 @@ jobs:
         run: pip install tox
       - name: Run quality checks
         run: tox -e quality
+
+  changed-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: neuralmagic/nm-actions/actions/changed-files@update-change-tracking
+        with:
+          include-patterns: .*
