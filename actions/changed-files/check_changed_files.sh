@@ -5,42 +5,42 @@
 
 set -ex
 
-if [ -z "${GITHUB_BASE_REF}" ]; then
+if [[ -z "${GITHUB_BASE_REF}" ]]; then
 	# this is not a pull request event, just get the previous commit
 	previous_sha=$(git rev-parse --verify 'HEAD^{commit}')
 else
 	previous_sha=${GITHUB_BASE_REF}
 fi
-CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${previous_sha}..HEAD)
 
-IFS=$'\n' read -r -a INCLUDE_PATTERNS <<<"${INCLUDE_PATTERN}"
-IFS=$'\n' read -r -a EXCLUDE_PATTERNS <<<"${EXCLUDE_PATTERN}"
-MATCHED_FILES=""
+current_branch=$(git branch --show-current)
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT "origin/${previous_sha}..${current_branch}")
+
+readarray -t INCLUDE_PATTERNS < <(echo "${INCLUDE_PATTERN}")
+readarray -t EXCLUDE_PATTERNS < <(echo "${EXCLUDE_PATTERN}")
+declare -a MATCHED_FILES
 while IFS= read -r file; do
-	# Check if the file matches any include pattern
+	should_include=0
+	should_exclude=0
+
 	for include_pattern in "${INCLUDE_PATTERNS[@]}"; do
-		if [[ ! "$file" =~ $include_pattern ]]; then
-			continue
+		if [[ "${file}" =~ ${include_pattern} ]]; then
+			should_include=1
+			break
 		fi
+	done
 
-		if [[ ${EXCLUDE_PATTERNS[@]} -eq 0 ]]; then
-			MATCHED_FILES+="file"$'\n'
-			continue
-		fi
-
-		exclude_match=false
+	if [[ ${#EXCLUDE_PATTERNS[@]} -ne 0 ]]; then
 		for exclude_pattern in "${EXCLUDE_PATTERNS[@]}"; do
-			if [[ "$file" =~ $exclude_pattern ]]; then
-				exclude_match=true
+			if [[ "${file}" =~ ${exclude_pattern} ]]; then
+				should_exclude=1
 				break
 			fi
 		done
-		if [ "$exclude_match" = true ]; then
-			break
-		fi
-		echo "Matched changed file: $file"
-		MATCHED_FILES+="$file"$'\n'
-	done
-done <<<"$CHANGED_FILES"
+	fi
 
-echo "all_changed_files=$MATCHED_FILES" >>"$GITHUB_OUTPUT"
+	if [[ ${should_include} -eq 1 ]] && [[ ${should_exclude} -ne 1 ]]; then
+		MATCHED_FILES+=("${file}")
+	fi
+done <<<"${CHANGED_FILES}"
+
+echo "all_changed_files=${MATCHED_FILES[*]}" | tee -a "${GITHUB_OUTPUT}"
