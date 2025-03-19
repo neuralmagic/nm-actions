@@ -29,7 +29,7 @@ while IFS= read -r file; do
 		fi
 	done
 
-	if [[ ${#EXCLUDE_PATTERNS[@]} -ne 0 ]]; then
+	if [[ ${should_include} -eq 1 ]] && [[ ${#EXCLUDE_PATTERNS[@]} -ne 0 ]]; then
 		for exclude_pattern in "${EXCLUDE_PATTERNS[@]}"; do
 			if [[ "${file}" =~ ${exclude_pattern} ]]; then
 				should_exclude=1
