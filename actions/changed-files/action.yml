@@ -1,4 +1,5 @@
 ---
+name: changed-files
 description: Matches changed files based on include and exclude patterns.
 
 inputs:
@@ -12,7 +13,7 @@ inputs:
 outputs:
   all_changed_files:
     description: return status from change
-    value: ${{ steps.changed.output.all_changed_files }}
+    value: ${{ steps.changed.outputs.all_changed_files }}
 
 runs:
   using: composite
