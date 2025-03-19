@@ -9,11 +9,11 @@ if [[ -z "${GITHUB_BASE_REF}" ]]; then
 	# this is not a pull request event, just get the previous commit
 	previous_sha=$(git rev-parse --verify 'HEAD^{commit}')
 else
-	previous_sha=${GITHUB_BASE_REF}
+	previous_sha="origin/${GITHUB_BASE_REF}"
 fi
 
 current_branch=$(git branch --show-current)
-CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT "origin/${previous_sha}..${current_branch}")
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT "${previous_sha}..${current_branch}")
 
 readarray -t INCLUDE_PATTERNS < <(echo "${INCLUDE_PATTERN}")
 readarray -t EXCLUDE_PATTERNS < <(echo "${EXCLUDE_PATTERN}")
