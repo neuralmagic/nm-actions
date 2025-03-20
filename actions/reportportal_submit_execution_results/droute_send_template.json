@@ -1,0 +1,22 @@
+{
+    "targets": {
+      "reportportal": {
+        "disabled": false,
+        "config": {
+        },
+        "processing": {
+          "apply_tfa": true,
+          "merge_launches": true,
+          "simple_xml": false,
+          "auto_dashboard": false,
+          "launch_with_class_name": true,
+          "property_filter": [
+            ".*"
+          ],
+          "debug": true,
+          "launch": {
+          }
+        }
+      }
+    }
+  }
