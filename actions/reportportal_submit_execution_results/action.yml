@@ -93,7 +93,7 @@ runs:
                                  --verbose \
                                  --wait=20)
         echo "$DROUTE_OUT"
-        LAUNCH_URL=$(echo $DROUTE_OUT | yq -r '.targets[] | select(.name == "reportportal") | .events[] | select(.component == "reportportal-connector") | .message' $DROUTE_OUT | jq -r '.[0]."launch_url"')  || SUCCESS="$?"
+        LAUNCH_URL=$(echo "$DROUTE_OUT" | yq eval -o=json '.' - | jq -r 'select(.status == "OK") | .targets[] | select(.name == "reportportal") | select(.status == "OK") | .events[] | select(.component == "reportportal-connector") | .message | fromjson | .[0].launch_url') || SUCCESS="$?"
 
         echo "launch_url=$LAUNCH_URL"  | tee -a $GITHUB_OUTPUT
         echo "status=$SUCCESS"  | tee -a $GITHUB_OUTPUT
