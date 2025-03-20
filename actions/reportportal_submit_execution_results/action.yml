@@ -85,7 +85,7 @@ runs:
         # capture output and verify success
         echo "Submitting test run to ReportPortal..."
         SUCCESS=0
-        
+
         DROUTE_CMD='droute send --metadata datarouter.json --results "$TEST_RESULTS/*.xml" --username "$DROUTE_USERNAME" --password "$DROUTE_PASSWORD" --url "$DROUTE_URL" --verbose --wait=20'
         echo "droute command:/n$DROUTE_CMD"
         LAUNCH_URL=$($DROUTE_CMD | yq -r '.targets[] | select(.name == "reportportal") | .events[] | select(.component == "reportportal-connector") | .message' | jq -r '.[0]."launch_url"')  || SUCCESS="$?"
