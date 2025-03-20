@@ -20,11 +20,11 @@ inputs:
          "project": <project>,
          "name": <run_name>,
          "description": <GHA run url>
-         "attributes": {
-              "wheel": <wheel name>,
-              "wf_category": <workflow category>,
+         "attributes": [
+              {"key": "wheel", "value": <wheel name>},
+              {"key": "wf_category", "value": <workflow category>},
               ...
-         }
+         ]
       }
     required: true
 
@@ -92,6 +92,7 @@ runs:
                                  --url "$DROUTE_URL" \
                                  --verbose \
                                  --wait=20)
+        echo "response to 'droute send' command..."
         echo "$DROUTE_OUT"
         LAUNCH_URL=$(echo "$DROUTE_OUT" | yq eval -o=json '.' - | jq -r 'select(.status == "OK") | .targets[] | select(.name == "reportportal") | select(.status == "OK") | .events[] | select(.component == "reportportal-connector") | .message | fromjson | .[0].launch_url') || SUCCESS="$?"
 
