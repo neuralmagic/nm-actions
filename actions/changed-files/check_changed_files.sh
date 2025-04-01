@@ -7,7 +7,7 @@ set -ex
 
 if [[ -z "${GITHUB_BASE_REF}" ]]; then
 	# this is not a pull request event, just get the previous commit
-	previous_sha=$(git rev-parse --verify 'HEAD^{commit}')
+	previous_sha=$(git rev-parse --verify 'HEAD^')
 else
 	previous_sha="origin/${GITHUB_BASE_REF}"
 fi
