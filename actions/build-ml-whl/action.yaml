@@ -53,7 +53,8 @@ runs:
         status=0
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
-        make -B build || status=$?
+        #make -B build || status=$?
+        BUILD_TYPE=$BUILD_TYPE python3 -m build . || status=$?
         ls dist/; mkdir build-results
         echo "
         <testsuites>
