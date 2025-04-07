@@ -11,12 +11,6 @@ inputs:
     description: If the build is a release build
     required: false
     default: false
-  name:
-    description: Name to append to the wheel
-    required: false
-  venv:
-    description: path of virtualenv if using it
-    required: false
 
 outputs:
   whlname:
@@ -37,11 +31,10 @@ runs:
       id: build
       shell: bash
       run: |-
-        if [[ ! -z "${{ inputs.venv }}" ]]; then
-            source ${{ inputs.venv }}/bin/activate
-        fi
-        pip install setuptools-scm build
-        name="${{ inputs.name }}"
+        pip install virtualenv
+        virtualenv venv
+        source venv/bin/activate
+        pip setuptools-scm build
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
             export BUILD_TYPE="release"
@@ -50,11 +43,10 @@ runs:
         else
             export BUILD_TYPE="nightly"
         fi
-        status=0
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
-        #make -B build || status=$?
-        BUILD_TYPE=$BUILD_TYPE python3 -m build . || status=$?
+        status=0
+        BUILD_TYPE=$BUILD_TYPE python -m build . || status=$?
         ls dist/; mkdir build-results
         echo "
         <testsuites>
