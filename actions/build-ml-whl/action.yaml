@@ -34,7 +34,7 @@ runs:
         pip install virtualenv
         virtualenv venv
         source venv/bin/activate
-        pip setuptools-scm build
+        pip install setuptools-scm build
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
             export BUILD_TYPE="release"
