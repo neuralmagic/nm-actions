@@ -11,12 +11,6 @@ inputs:
     description: If the build is a release build
     required: false
     default: false
-  name:
-    description: Name to append to the wheel
-    required: false
-  venv:
-    description: path of virtualenv if using it
-    required: false
 
 outputs:
   whlname:
@@ -37,26 +31,22 @@ runs:
       id: build
       shell: bash
       run: |-
-        if [[ ! -z "${{ inputs.venv }}" ]]; then
-            source ${{ inputs.venv }}/bin/activate
-        fi
-        pip install setuptools wheel
-        name="${{ inputs.name }}"
-        ver_file=$(find . -type f -name "version.py")
+        pip install virtualenv
+        virtualenv venv
+        source venv/bin/activate
+        pip install setuptools-scm build
+        BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
-          sed -i 's/is_release = False/is_release = True/g' ${ver_file}
-          sed -i 's/build_type = "dev"/build_type = "release"/g' ${ver_file}
+            export BUILD_TYPE="release"
         elif ${{ inputs.dev }}; then
-          sed -i 's/is_dev = False/is_dev = True/g' ${ver_file}
-          sed -i 's/dev_number = None/dev_number = '"$name"'/g' ${ver_file}
+            export BUILD_TYPE="dev"
         else
-            sed -i 's/build_type = "dev"/build_type = "nightly"/g' ${ver_file}
-            sed -i 's/is_release = True/is_release = False/g' ${ver_file}
+            export BUILD_TYPE="nightly"
         fi
-        status=0
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
-        make -B build || status=$?
+        status=0
+        BUILD_TYPE=$BUILD_TYPE python -m build . || status=$?
         ls dist/; mkdir build-results
         echo "
         <testsuites>
