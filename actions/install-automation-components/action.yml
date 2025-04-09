@@ -6,6 +6,18 @@ runs:
   using: composite
   steps:
     - shell: bash
+      id: check_os
+      run: |-
+        if command -v apt-get &>/dev/null; then
+          echo "os=ubuntu" | tee -a "$GITHUB_OUTPUT"
+        elif command -v microdnf &>/dev/null; then
+          echo "os=ubi-minimal" | tee -a "$GITHUB_OUTPUT"
+        else
+          echo "::error::unknown OS"
+          exit 1
+        fi
+    - shell: bash
+      if: steps.check_os.outputs.os == 'ubuntu'
       run: |-
         # packages
         sudo apt update -y
@@ -21,3 +33,10 @@ runs:
         && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
         && sudo apt update \
         && sudo apt install gh -y
+    - shell: bash
+      if: steps.check_os.outputs.os == 'ubi-minimal'
+      run: |-
+        if ! command -v gh &>/dev/null; then
+          curl -L https://cli.github.com/packages/rpm/gh-cli.repo | sudo tee /etc/yum.repos.d/gh-cli.repo
+          sudo microdnf install -y gh
+        fi
