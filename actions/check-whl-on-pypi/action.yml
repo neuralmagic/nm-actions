@@ -1,0 +1,32 @@
+---
+name: check whl on pypi
+description: check if specified whl already on pypi server or not
+
+inputs:
+  whl:
+    description: filepath of whl to check
+    required: true
+
+outputs:
+  status:
+    description: return true if whl not found, false if already existed
+    value: ${{ steps.check.outputs.status }}
+
+runs:
+  using: composite
+  steps:
+    - id: check
+      run: |
+        WHL_NAME=`basename ${{ inputs.whl }}`
+        PACKAGE_NAME=`echo "$WHL_NAME" | cut -d'-' -f1 | tr '_' '-'`
+        PACKAGE_VER=`echo "$WHL_NAME" | cut -d'-' -f2`
+        EXISTING_VERS=`pip index --pre versions $PACKAGE_NAME`
+        STATUS=0
+        if [ $(echo "$EXISTING_VERS" | grep "PACKAGE_VER," | wc -l) -gt 0 ]; then
+            echo "PACKAGE_VER already existed on PyPi"
+            STATUS=1
+        else
+            echo "PACKAGE_VER not found on PyPi"
+        fi
+        echo "status=${STATUS}" >> "$GITHUB_OUTPUT"
+      shell: bash
