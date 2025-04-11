@@ -56,7 +56,7 @@ runs:
         if ${{ inputs.release }} && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
             status=1
         fi
-        if ${{ ! inputs.dev }} && ${{ ! inputs.release }} && [[ ! $a =~ a[0-9]{8}- ]]); then
+        if ${{ ! inputs.dev }} && ${{ ! inputs.release }} && [[ ! $a =~ a[0-9]{8}- ]]; then
             status=1
         fi
         echo "
