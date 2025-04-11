@@ -9,7 +9,7 @@ inputs:
 
 outputs:
   status:
-    description: return true if whl not found, false if already existed
+    description: return 0 if whl not found, 1 if already existed
     value: ${{ steps.check.outputs.status }}
 
 runs:
