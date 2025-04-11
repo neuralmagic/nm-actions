@@ -59,13 +59,7 @@ runs:
         if ${{ ! inputs.dev }} && ${{ ! inputs.release }} && [[ ! $a =~ a[0-9]{8}- ]]; then
             status=1
         fi
-        echo "
-        <testsuites>
-            <testsuite errors=\"$status\" failures=\"$status\" name=\"build\" skipped=\"0\" tests=\"1\">
-                <testcase classname=\"build\"/>
-            </testsuite>
-        </testsuites>" > build-results/result.xml
-        echo "=========== Build log ==========="
+        echo "=========== Build Status ==========="
         echo "$status"
         echo "whlname=$WHL_NAME" >> "$GITHUB_OUTPUT"
         echo "tarname=$TARGZ_NAME" >> "$GITHUB_OUTPUT"
