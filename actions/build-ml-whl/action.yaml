@@ -47,7 +47,18 @@ runs:
         cd $(dirname ${makefile_path})
         status=0
         BUILD_TYPE=$BUILD_TYPE python -m build . || status=$?
-        ls dist/; mkdir build-results
+        WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
+        TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
+        # check if created wheel match build type
+        if ${{ inputs.dev }} && [[ ! "$WHL_NAME" =~ \.dev ]]; then
+            status=1
+        fi
+        if ${{ inputs.release }} && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
+            status=1
+        fi
+        if ${{ ! inputs.dev }} && ${{ ! inputs.release }} && [[ ! $a =~ a[0-9]{8}- ]]); then
+            status=1
+        fi
         echo "
         <testsuites>
             <testsuite errors=\"$status\" failures=\"$status\" name=\"build\" skipped=\"0\" tests=\"1\">
@@ -56,7 +67,7 @@ runs:
         </testsuites>" > build-results/result.xml
         echo "=========== Build log ==========="
         echo "$status"
-        echo "whlname=$(find dist -name '*.whl' -exec basename {} \;)" >> "$GITHUB_OUTPUT"
-        echo "tarname=$(find dist -name '*.tar.gz' -exec basename {} \;)" >> "$GITHUB_OUTPUT"
+        echo "whlname=$WHL_NAME" >> "$GITHUB_OUTPUT"
+        echo "tarname=$TARGZ_NAME" >> "$GITHUB_OUTPUT"
         echo "status=${status}" >> "$GITHUB_OUTPUT"
         exit ${status}
