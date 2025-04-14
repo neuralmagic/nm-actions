@@ -23,10 +23,10 @@ runs:
         EXISTING_VERS=`pip index --pre versions $PACKAGE_NAME`
         STATUS=0
         if [ $(echo "$EXISTING_VERS" | grep "$PACKAGE_VER," | wc -l) -gt 0 ]; then
-            echo "PACKAGE_VER already existed on PyPi"
+            echo "$PACKAGE_VER already existed on PyPi"
             STATUS=1
         else
-            echo "PACKAGE_VER not found on PyPi"
+            echo "$PACKAGE_VER not found on PyPi"
         fi
         echo "status=${STATUS}" >> "$GITHUB_OUTPUT"
       shell: bash
