@@ -6,11 +6,11 @@ inputs:
   dev:
     description: If the build is a dev build
     required: false
-    default: false
+    default: "false"
   release:
     description: If the build is a release build
     required: false
-    default: false
+    default: "false"
 
 outputs:
   whlname:
@@ -50,15 +50,15 @@ runs:
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
         # check if created wheel match build type
-        if ${{ inputs.dev }} && [[ ! "$WHL_NAME" =~ \.dev ]]; then
+        if [[ $BUILD_TYPE = "dev" ]] && [[ ! "$WHL_NAME" =~ \.dev ]]; then
             echo "ERROR: $WHL_NAME not dev build"
             status=1
         fi
-        if ${{ inputs.release }} && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
+        if [[ $BUILD_TYPE = "release" ]] && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
             echo "ERROR: $WHL_NAME not release build"
             status=1
         fi
-        if ${{ ! inputs.dev }} && ${{ ! inputs.release }} && [[ ! $a =~ a[0-9]{8}- ]]; then
+        if [[ $BUILD_TYPE = "nightly" ]] && [[ ! $a =~ a[0-9]{8}- ]]; then
             echo "ERROR: $WHL_NAME not nightly build"
             status=1
         fi
