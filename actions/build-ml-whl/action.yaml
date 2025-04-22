@@ -46,7 +46,7 @@ runs:
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
         status=0
-        BUILD_TYPE=$BUILD_TYPE python -m build . || status=$?
+        BUILD_TYPE=$BUILD_TYPE make build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
         # check if created wheel match build type
