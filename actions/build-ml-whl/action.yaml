@@ -34,7 +34,7 @@ runs:
         pip install virtualenv
         virtualenv venv
         source venv/bin/activate
-        pip install -U build setuptools "setuptools-scm<8.3"
+        pip install build
 
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
@@ -50,7 +50,7 @@ runs:
         cd $(dirname ${makefile_path})
 
         status=0
-        SETUPTOOLS_SCM_DEBUG=1 python -m build --skip-dependency-check || status=$?
+        SETUPTOOLS_SCM_DEBUG=1 python -m build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
 
