@@ -23,7 +23,6 @@ outputs:
     description: status of wheel build
     value: ${{ steps.build.outputs.status }}
 
-# can we just pass in build args instead of updating the variables in version.py?
 runs:
   using: composite
   steps:
@@ -34,7 +33,15 @@ runs:
         pip install virtualenv
         virtualenv venv
         source venv/bin/activate
-        pip install setuptools-scm build
+
+        echo "Python version: $(python -V)"
+        echo "Pip version: $(pip -V)"
+        echo "::group::environment variables"
+        env
+        echo "::endgroup::"
+
+        pip install build
+
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
             export BUILD_TYPE="release"
@@ -43,28 +50,31 @@ runs:
         else
             export BUILD_TYPE="nightly"
         fi
+        echo "Using BUILD_TYPE=${BUILD_TYPE}"
+
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
         status=0
         BUILD_TYPE=$BUILD_TYPE python -m build . || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
+
         # check if created wheel match build type
-        if ${{ inputs.dev }} && [[ ! "$WHL_NAME" =~ \.dev ]]; then
+        if [[ $BUILD_TYPE = "dev" ]] && [[ ! "$WHL_NAME" =~ \.dev ]]; then
             echo "ERROR: $WHL_NAME not dev build"
             status=1
         fi
-        if ${{ inputs.release }} && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
+        if [[ $BUILD_TYPE = "release" ]] && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
             echo "ERROR: $WHL_NAME not release build"
             status=1
         fi
-        if ${{ ! inputs.dev }} && ${{ ! inputs.release }} && [[ ! $a =~ a[0-9]{8}- ]]; then
+        if [[ $BUILD_TYPE = "nightly" ]] && [[ ! $a =~ a[0-9]{8}- ]]; then
             echo "ERROR: $WHL_NAME not nightly build"
             status=1
         fi
+
         echo "=========== Build Status ==========="
-        echo "$status"
-        echo "whlname=$WHL_NAME" >> "$GITHUB_OUTPUT"
-        echo "tarname=$TARGZ_NAME" >> "$GITHUB_OUTPUT"
-        echo "status=${status}" >> "$GITHUB_OUTPUT"
+        echo "whlname=$WHL_NAME" | tee -a "$GITHUB_OUTPUT"
+        echo "tarname=$TARGZ_NAME" | tee -a "$GITHUB_OUTPUT"
+        echo "status=${status}" | tee -a "$GITHUB_OUTPUT"
         exit ${status}
