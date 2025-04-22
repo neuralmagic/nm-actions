@@ -36,8 +36,8 @@ runs:
 
         echo "Python version: $(python -V)"
         echo "Pip version: $(pip -V)"
-        echo "::group::environment variables"
-        env
+        echo "::group::environment variables (sorted)"
+        env | sort
         echo "::endgroup::"
 
         pip install build
