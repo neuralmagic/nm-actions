@@ -49,6 +49,8 @@ runs:
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
 
+        echo "git status: $(git status)"
+
         status=0
         SETUPTOOLS_SCM_DEBUG=1 python -m build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
