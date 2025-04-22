@@ -50,6 +50,7 @@ runs:
         cd $(dirname ${makefile_path})
 
         echo "git status: $(git status)"
+        echo "python -m setuptools_scm: $(python -m setuptools_scm)"
 
         status=0
         SETUPTOOLS_SCM_DEBUG=1 python -m build || status=$?
