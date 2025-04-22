@@ -54,11 +54,11 @@ runs:
             echo "ERROR: $WHL_NAME not dev build"
             status=1
         fi
-        if [[ $BUILD_TYPE = "release" ]] && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
+        if [[ $BUILD_TYPE = "release" ]] && ([[ "$WHL_NAME" =~ \.dev ]] || [[ "$WHL_NAME" =~ a[0-9]{8}- ]]); then
             echo "ERROR: $WHL_NAME not release build"
             status=1
         fi
-        if [[ $BUILD_TYPE = "nightly" ]] && [[ ! $a =~ a[0-9]{8}- ]]; then
+        if [[ $BUILD_TYPE = "nightly" ]] && [[ ! "$WHL_NAME" =~ a[0-9]{8}- ]]; then
             echo "ERROR: $WHL_NAME not nightly build"
             status=1
         fi
