@@ -55,6 +55,7 @@ runs:
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
         status=0
+        export GIT_CEILING_DIRECTORIES=".."
         BUILD_TYPE=$BUILD_TYPE python -m build . || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
