@@ -35,7 +35,7 @@ runs:
         python -m pip install virtualenv
         virtualenv -p 3.12 venv
         source venv/bin/activate
-        pip install setuptools-scm
+        pip install build setuptools-scm wheel
 
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
@@ -55,7 +55,7 @@ runs:
 
         status=0
         # rm pyproject.toml -- seems to work, but need to specify version_file some other way
-        SETUPTOOLS_SCM_DEBUG=1 make build || status=$?
+        SETUPTOOLS_SCM_DEBUG=1 python -m build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
 
