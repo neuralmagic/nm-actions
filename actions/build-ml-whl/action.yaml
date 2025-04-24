@@ -54,7 +54,8 @@ runs:
         echo "python -m setuptools_scm: $(python -m setuptools_scm)"
 
         status=0
-        make build || status=$?
+        rm pyproject.toml
+        SETUPTOOLS_SCM_DEBUG=1 make build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
 
