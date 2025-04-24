@@ -31,10 +31,11 @@ runs:
       id: build
       shell: bash
       run: |-
-        pip install virtualenv
-        virtualenv venv
+        echo "Python: $(python -V)"
+        python -m pip install virtualenv
+        virtualenv -p 3.12 venv
         source venv/bin/activate
-        pip install build
+        pip install setuptools-scm==8.3.0
 
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
@@ -53,7 +54,7 @@ runs:
         echo "python -m setuptools_scm: $(python -m setuptools_scm)"
 
         status=0
-        SETUPTOOLS_SCM_DEBUG=1 python -m build || status=$?
+        make build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
 
