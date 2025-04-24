@@ -35,7 +35,7 @@ runs:
         python -m pip install virtualenv
         virtualenv -p 3.12 venv
         source venv/bin/activate
-        pip install build setuptools-scm==8.2.0
+        pip install build setuptools-scm==8.2.0 wheel
 
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
