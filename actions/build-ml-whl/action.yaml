@@ -55,7 +55,7 @@ runs:
 
         status=0
         # rm pyproject.toml -- seems to work, but need to specify version_file some other way
-        SETUPTOOLS_SCM_DEBUG=1 python -m build -n . || status=$?
+        SETUPTOOLS_SCM_DEBUG=1 make build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
 
