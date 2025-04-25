@@ -6,11 +6,11 @@ inputs:
   dev:
     description: If the build is a dev build
     required: false
-    default: false
+    default: 'false'
   release:
     description: If the build is a release build
     required: false
-    default: false
+    default: 'false'
 
 outputs:
   whlname:
@@ -34,7 +34,8 @@ runs:
         pip install virtualenv
         virtualenv venv
         source venv/bin/activate
-        pip install setuptools-scm build
+        pip install setuptools-scm==8.2.0
+
         BUILD_TYPE="dev"
         if ${{ inputs.release }}; then
             export BUILD_TYPE="release"
@@ -43,28 +44,32 @@ runs:
         else
             export BUILD_TYPE="nightly"
         fi
+        echo "BUILD_TYPE=${BUILD_TYPE}"
+
         makefile_path=$(find . -type f -name "Makefile")
         cd $(dirname ${makefile_path})
+
         status=0
-        BUILD_TYPE=$BUILD_TYPE python -m build . || status=$?
+        make build || status=$?
         WHL_NAME=$(find dist -name '*.whl' -exec basename {} \;)
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
+
         # check if created wheel match build type
-        if ${{ inputs.dev }} && [[ ! "$WHL_NAME" =~ \.dev ]]; then
+        if [[ $BUILD_TYPE = "dev" ]] && [[ ! "$WHL_NAME" =~ \.dev ]]; then
             echo "ERROR: $WHL_NAME not dev build"
             status=1
         fi
-        if ${{ inputs.release }} && ([[ "$WHL_NAME" =~ \.dev ]] || [[ $a =~ a[0-9]{8}- ]]); then
+        if [[ $BUILD_TYPE = "release" ]] && ([[ "$WHL_NAME" =~ \.dev ]] || [[ "$WHL_NAME" =~ a[0-9]{8}- ]]); then
             echo "ERROR: $WHL_NAME not release build"
             status=1
         fi
-        if ${{ ! inputs.dev }} && ${{ ! inputs.release }} && [[ ! $a =~ a[0-9]{8}- ]]; then
+        if [[ $BUILD_TYPE = "nightly" ]] && [[ ! "$WHL_NAME" =~ a[0-9]{8}- ]]; then
             echo "ERROR: $WHL_NAME not nightly build"
             status=1
         fi
+
         echo "=========== Build Status ==========="
-        echo "$status"
-        echo "whlname=$WHL_NAME" >> "$GITHUB_OUTPUT"
-        echo "tarname=$TARGZ_NAME" >> "$GITHUB_OUTPUT"
-        echo "status=${status}" >> "$GITHUB_OUTPUT"
+        echo "whlname=$WHL_NAME" | tee -a "$GITHUB_OUTPUT"
+        echo "tarname=$TARGZ_NAME" | tee -a "$GITHUB_OUTPUT"
+        echo "status=${status}" | tee -a "$GITHUB_OUTPUT"
         exit ${status}
