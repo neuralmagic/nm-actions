@@ -12,6 +12,8 @@ runs:
           echo "os=ubuntu" | tee -a "$GITHUB_OUTPUT"
         elif command -v microdnf &>/dev/null; then
           echo "os=ubi-minimal" | tee -a "$GITHUB_OUTPUT"
+        elif command -v dnf &>/dev/null; then
+          echo "os=rhel" | tee -a "$GITHUB_OUTPUT"
         else
           echo "::error::unknown OS"
           exit 1
@@ -39,4 +41,11 @@ runs:
         if ! command -v gh &>/dev/null; then
           curl -L https://cli.github.com/packages/rpm/gh-cli.repo | sudo tee /etc/yum.repos.d/gh-cli.repo
           sudo microdnf install -y gh
+        fi
+    - shell: bash
+      if: steps.check_os.outputs.os == 'rhel'
+      run: |-
+        if ! command -v gh &>/dev/null; then
+          curl -L https://cli.github.com/packages/rpm/gh-cli.repo | sudo tee /etc/yum.repos.d/gh-cli.repo
+          sudo dnf install -y gh
         fi
