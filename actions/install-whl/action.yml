@@ -24,15 +24,21 @@ runs:
       run: |
         source "$VENV/bin/activate"
 
+        INSTALL=(pip install)
+
+        if command -v uv; then
+          INSTALL=(uv "${INSTALL[@]}")
+        fi
+
         whl=$(find . -type f -iname "$NAME*.whl")
         if [ -n "$EXTRA" ]; then
           whl="$whl$EXTRA"
         fi
 
-        echo "::group::pip install $whl"
-        pip install "$whl"
+        echo "::group::install-wheel - ${INSTALL[@]} $whl"
+        "${INSTALL[@]}" "$whl"
+        echo "::endgroup::"
 
         version=$(pip freeze | grep "$NAME")
         echo "installed $version"
-        echo "::endgroup::"
       shell: bash
