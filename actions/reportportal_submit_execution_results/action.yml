@@ -71,7 +71,7 @@ runs:
 
         # generate report metadata file
         TEMPLATE="${GITHUB_ACTION_PATH}/droute_send_template.json"
-        if [ -z "$TEMPLATE" ]; then
+        if [ -f $TEMPLATE ]; then
           echo "droute_send_template.json not found in $GITHUB_ACTION_PATH"
           exit 1
         fi
