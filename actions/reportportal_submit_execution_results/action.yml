@@ -71,6 +71,11 @@ runs:
 
         # generate report metadata file
         TEMPLATE=`find $GITHUB_ACTION_PATH -type f -name 'droute_send_template.json'`
+        if [ -z "$TEMPLATE" ]; then
+          echo "droute_send_template.json not found in $GITHUB_ACTION_PATH"
+          exit 1
+        fi
+
         echo "Generating datarouter.json based on template $TEMPLATE"
         jq --raw-output \
            --slurpfile metadata ${{ inputs.metadata_filepath }} \
