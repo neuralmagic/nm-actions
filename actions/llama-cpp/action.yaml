@@ -1,0 +1,37 @@
+name: "Run llama.cpp"
+description: "Run llama.cpp OpenAI compatible web server"
+
+inputs:
+  port:
+    description: "The port of running service"
+    required: false
+    default: 8080
+  model:
+    description: "The Hugging Face model"
+    required: false
+    default: "aminkhalafi/Phi-3-mini-4k-instruct-Q4_K_M-GGUF"
+  context-size:
+    description: "The size of input context size (tokens)"
+    required: false
+    default: 2048
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install llama.cpp
+      id: install
+      shell: bash
+      run: |
+        brew install llama.cpp
+
+    - name: Start llama.cpp web server
+      id: start
+      shell: bash
+      run: |
+        llama-server --hf-repo "${{inputs.port}}" -ctx-size "${{inputs.context-size}}" --port "${{inputs.port}}" &
+
+    - name: Wait llama server to be started
+      id: wait
+      shell: bash
+      run: |
+        sleep 10
