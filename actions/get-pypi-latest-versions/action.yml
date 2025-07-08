@@ -36,10 +36,6 @@ runs:
         echo "get-pypi-latest-versions - cleaning up virtual environment"
         rm -r "$VENV_NAME"
 
-        if [ -z "$versions" ]; then
-          exit 1
-        fi
-
         echo "versions=$versions" >> $GITHUB_OUTPUT
       env:
         PACKAGE_NAME: ${{ inputs.package_name }}
