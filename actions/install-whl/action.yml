@@ -25,9 +25,11 @@ runs:
         source "$VENV/bin/activate"
 
         INSTALL=(pip install)
+        FREEZE=(pip freeze)
 
         if command -v uv; then
           INSTALL=(uv "${INSTALL[@]}")
+          FREEZE=(uv "${FREEZE[@]}")
         fi
 
         whl=$(find . -type f -iname "$NAME*.whl")
@@ -39,6 +41,6 @@ runs:
         "${INSTALL[@]}" "$whl"
         echo "::endgroup::"
 
-        version=$(pip freeze | grep "$NAME")
+        version=$("${FREEZE[@]}" | grep "$NAME")
         echo "installed $version"
       shell: bash
