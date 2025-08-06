@@ -48,7 +48,7 @@ runs:
         fi
         echo "BUILD_TYPE=${BUILD_TYPE}"
 
-        makefile_path=$(find . -maxdepth 2 -type f -name "Makefile" | head -1)
+        makefile_path=$(find . -maxdepth 2 -type f -name "Makefile")
         echo "makefile_path=${makefile_path}"
         makefile_dir=$(dirname "${makefile_path}")
         echo "makefile_dir=${makefile_dir}"
