@@ -40,11 +40,11 @@ runs:
         pip install setuptools-scm==8.2.0
         echo "::endgroup::"
 
-        BUILD_TYPE="nightly"
+        export BUILD_TYPE="nightly"
         if ${{ inputs.release }}; then
-            export BUILD_TYPE="release"
+            BUILD_TYPE="release"
         elif ${{ inputs.dev }}; then
-            export BUILD_TYPE="dev"
+            BUILD_TYPE="dev"
         fi
         echo "BUILD_TYPE=${BUILD_TYPE}"
 
