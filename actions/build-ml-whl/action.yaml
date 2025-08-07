@@ -23,31 +23,36 @@ outputs:
     description: status of wheel build
     value: ${{ steps.build.outputs.status }}
 
-# can we just pass in build args instead of updating the variables in version.py?
 runs:
   using: composite
   steps:
     - name: build
       id: build
-      shell: bash
       run: |-
+        echo "::group::Installing virtualenv and creating a venv"
         pip install virtualenv
         virtualenv venv
-        source venv/bin/activate
-        pip install setuptools-scm==8.2.0
+        echo "::endgroup::"
 
-        BUILD_TYPE="dev"
+        source venv/bin/activate
+
+        echo "::group::Installing setuptools-scm"
+        pip install setuptools-scm==8.2.0
+        echo "::endgroup::"
+
+        export BUILD_TYPE="nightly"
         if ${{ inputs.release }}; then
-            export BUILD_TYPE="release"
+            BUILD_TYPE="release"
         elif ${{ inputs.dev }}; then
-            export BUILD_TYPE="dev"
-        else
-            export BUILD_TYPE="nightly"
+            BUILD_TYPE="dev"
         fi
         echo "BUILD_TYPE=${BUILD_TYPE}"
 
-        makefile_path=$(find . -type f -name "Makefile")
-        cd $(dirname ${makefile_path})
+        makefile_path=$(find . -maxdepth 2 -type f -name "Makefile")
+        echo "makefile_path=${makefile_path}"
+        makefile_dir=$(dirname "${makefile_path}")
+        echo "makefile_dir=${makefile_dir}"
+        cd "${makefile_dir}"
 
         status=0
         make build || status=$?
@@ -55,21 +60,22 @@ runs:
         TARGZ_NAME=$(find dist -name '*.tar.gz' -exec basename {} \;)
 
         # check if created wheel match build type
-        if [[ $BUILD_TYPE = "dev" ]] && [[ ! "$WHL_NAME" =~ \.dev ]]; then
-            echo "ERROR: $WHL_NAME not dev build"
+        if [[ ${BUILD_TYPE} = "dev" ]] && [[ ! "${WHL_NAME}" =~ \.dev ]]; then
+            echo "ERROR: ${WHL_NAME} does not match dev build naming pattern"
             status=1
         fi
-        if [[ $BUILD_TYPE = "release" ]] && ([[ "$WHL_NAME" =~ \.dev ]] || [[ "$WHL_NAME" =~ a[0-9]{8}- ]]); then
-            echo "ERROR: $WHL_NAME not release build"
+        if [[ ${BUILD_TYPE} = "release" ]] && ([[ "${WHL_NAME}" =~ \.dev ]] || [[ "${WHL_NAME}" =~ a[0-9]{8}- ]]); then
+            echo "ERROR: ${WHL_NAME} does not match release build naming pattern"
             status=1
         fi
-        if [[ $BUILD_TYPE = "nightly" ]] && [[ ! "$WHL_NAME" =~ a[0-9]{8}- ]]; then
-            echo "ERROR: $WHL_NAME not nightly build"
+        if [[ ${BUILD_TYPE} = "nightly" ]] && [[ ! "${WHL_NAME}" =~ a[0-9]{8}- ]]; then
+            echo "ERROR: ${WHL_NAME} does not match nightly build naming pattern"
             status=1
         fi
 
         echo "=========== Build Status ==========="
-        echo "whlname=$WHL_NAME" | tee -a "$GITHUB_OUTPUT"
-        echo "tarname=$TARGZ_NAME" | tee -a "$GITHUB_OUTPUT"
+        echo "whlname=${WHL_NAME}" | tee -a "$GITHUB_OUTPUT"
+        echo "tarname=${TARGZ_NAME}" | tee -a "$GITHUB_OUTPUT"
         echo "status=${status}" | tee -a "$GITHUB_OUTPUT"
         exit ${status}
+      shell: bash
