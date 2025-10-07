@@ -1,0 +1,11 @@
+name: Run coverage and get badge
+description: 'complete neuralmagic testmo run'
+runs:
+  using: "composite"
+  steps:
+    - id: coverage-badge
+      run: |
+        echo "Obtaining test coverage ..."
+        # generate coverage badge and save in .mata folder
+        coverage-badge -f -o ./.meta/coverage_badge.svg
+      shell: bash
