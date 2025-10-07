@@ -21,7 +21,7 @@ runs:
       run: |
         if command -v uv; then
           echo "Creating venv named '${VENV_NAME}' with uv"
-          uv venv "${VENV_NAME}"
+          uv venv --seed "${VENV_NAME}"
         else
           echo "Creating venv named '${VENV_NAME}' with virtualenv"
           python -m pip install virtualenv
