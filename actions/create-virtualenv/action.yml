@@ -6,10 +6,6 @@ inputs:
   venv:
     description: name of virtualenv
     required: true
-  use_uv:
-    description: if 'true', use uv if available (falls back to virtualenv if not) (default='true')
-    required: false
-    default: 'true'
 
 outputs:
   penv:
@@ -21,10 +17,9 @@ runs:
   steps:
     - id: env
       env:
-        USE_UV: ${{ inputs.use_uv }}
         VENV_NAME: ${{ inputs.venv }}
       run: |
-        if [[ ${USE_UV} == 'true' ]] && command -v uv; then
+        if command -v uv; then
           echo "Creating venv named '${VENV_NAME}' with uv"
           uv venv "${VENV_NAME}"
         else
