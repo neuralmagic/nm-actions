@@ -1,11 +1,15 @@
 ---
 name: create virtualenv
-description: create virtualenv using input name
+description: create virtualenv using input name in the default working directory
 
 inputs:
   venv:
     description: name of virtualenv
     required: true
+  use_uv:
+    description: if 'true', use uv if available (falls back to virtualenv if not) (default='true')
+    required: false
+    default: 'true'
 
 outputs:
   penv:
@@ -16,10 +20,19 @@ runs:
   using: composite
   steps:
     - id: env
+      env:
+        USE_UV: ${{ inputs.use_uv }}
+        VENV_NAME: ${{ inputs.venv }}
       run: |
-        # install virtualenv
-        python -m pip install virtualenv
-        python -m virtualenv ${{ inputs.venv }}
-        pwd; ls -al
-        echo "penv=$(pwd)/${{ inputs.venv }}" >> "$GITHUB_OUTPUT" 
+        if [[ ${USE_UV} == 'true' ]] && command -v uv; then
+          uv venv "${VENV_NAME}"
+        else
+          python -m pip install virtualenv
+          python -m virtualenv "${VENV_NAME}"
+        fi
+
+        echo "::group::$(pwd) contents:"
+        ls -Al
+        echo "::endgroup::"
+        echo "penv=$(pwd)/${VENV_NAME}" >> "${GITHUB_OUTPUT}"
       shell: bash
