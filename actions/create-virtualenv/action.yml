@@ -25,8 +25,10 @@ runs:
         VENV_NAME: ${{ inputs.venv }}
       run: |
         if [[ ${USE_UV} == 'true' ]] && command -v uv; then
+          echo "Creating venv named '${VENV_NAME}' with uv"
           uv venv "${VENV_NAME}"
         else
+          echo "Creating venv named '${VENV_NAME}' with virtualenv"
           python -m pip install virtualenv
           python -m virtualenv "${VENV_NAME}"
         fi
