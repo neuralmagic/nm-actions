@@ -34,8 +34,6 @@ steps:
 
 This will match any file in the root-level `.github` folder, unless it ends in `.md` or `.rst`.
 
-⚠️ **Note:** When using multi-line values, make sure to use the `|-` syntax as below to eliminate trailing newlines.
-
 ```yaml
 steps:
   - name:
