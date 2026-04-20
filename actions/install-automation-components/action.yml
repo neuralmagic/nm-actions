@@ -51,9 +51,17 @@ runs:
     - shell: bash
       if: steps.check_os.outputs.os == 'rhel'
       run: |-
-        echo "::group::install-automation-components - install curl/git/wget/jq/gcc"
-        sudo dnf install -y curl git jq wget gcc gcc-c++ lld
-        echo "::endgroup::"
+        missing=()
+        for cmd in curl git jq wget gcc g++ lld; do
+          command -v "$cmd" &>/dev/null || missing+=("$cmd")
+        done
+        if [ ${#missing[@]} -gt 0 ]; then
+          echo "::group::install-automation-components - install ${missing[*]}"
+          sudo dnf install -y "${missing[@]}"
+          echo "::endgroup::"
+        else
+          echo "All required packages already installed, skipping dnf"
+        fi
 
         if ! command -v gh &>/dev/null; then
           echo "::group::install-automation-components - install gh cli tool"
